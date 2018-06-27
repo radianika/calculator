@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Calc</title>
+	<script src="http://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+	<link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+	<style>
+body {
+	background: url("https://img4.goodfon.ru/original/1366x768/6/7f/priroda-tuman-les-gora.jpg") no-repeat;
+	background-size: 100%;
+}
+
+.calculator-box {
+	min-height: 355px;
+	width: 220px;
+	border-radius: 5px;
+	position: relative;
+	top: 80px;
+	left: 40%;
+	padding: 5px;
+	background-color: rgba(75, 75, 75, 0.55);
+	font-size: 0px;
+	font-family: 'Ubuntu', sans-serif;
+}
+
+div .screen {
+	min-height: 80px;
+	font-size: 20px;
+	color: #fff;
+}
+
+.actual {
+	float: right;
+	font-size: 45px;
+	font-weight: bold;
+	color: #F8F8FF;
+}
+
+button {
+	height: 55px;
+	width: 55px;
+	display: inline-block;
+	margin-right: 0px;
+	border: 1px solid #46505a;
+	font-size: 25px;
+	color: black;
+	background: #e0e0e7;
+	font-family: 'Ubuntu', sans-serif;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	-webkit-tap-highlight-color: transparent;
+}
+
+.act,
+.result {
+	background: rgba(247, 126, 27, 1);
+	color: #f8f8ff;
+}
+
+.result,
+.clean {
+	width: 110px;
+
+}
+
+button:hover {
+	border: 2px solid black;
+}
+
+button:active {
+	background: #363636;
+	color: #fff;
+	border: 2px solid #363636;
+}
+
+.act:active,
+.result:active,
+.clean:active {
+	background: #EE4000;
+	border: 2px solid #EE4000;
+}
+
+</style>
+</head>
+
+<body>
+	<div class="calculator-box">
+		<div class="screen">
+			<span id="old"></span>
+			<span id="operate"></span>
+			<span id="new"></span>
+			<br>
+			<span class="actual">0</span>
+		</div>
+		<br>
+		<div class="buttons-box">
+			<button class="clean" value="AC">AC</button>
+			<!--clean all-->
+			<button class="plusminus" value="+/-">&#177;</button>
+			<button class="act" value="/">/</button>
+			<br>
+			<button class="btn" value="1">1</button>
+			<button class="btn" value="2">2</button>
+			<button class="btn" value="3">3</button>
+			<button class="act" value="*">*</button>
+			<br>
+			<button class="btn" value="4">4</button>
+			<button class="btn" value="5">5</button>
+			<button class="btn" value="6">6</button>
+			<button class="act" value="-">-</button>
+			<br>
+			<button class="btn" value="7">7</button>
+			<button class="btn" value="8">8</button>
+			<button class="btn" value="9">9</button>
+			<button class="act" value="+">+</button>
+			<br>
+			<button class="btn" value=".">,</button>
+			<button class="btn" value="0">0</button>
+			<button class="result" value="=">=</button>
+		</div>
+	</div>
+	<script>
+		var actualNumber = "";
+		var oldNumber = "";
+		var opAct = "";
+		var resultNumber = "";
+
+		//	 получает содержимое цифры из  value при нажатии
+		$('.btn').click(function valueUserInput() {
+			var userInputNumber = this.getAttribute("value");
+			showInput(userInputNumber);
+		});
+
+
+		//   показывает пользовательский ввод
+		function showInput(value) {
+			actualNumber = actualNumber + value;
+			$('.actual').text(actualNumber);
+
+			// уменьшение шрифта
+			if (actualNumber.length <= 8) {
+				$('.actual').css('font-size', '45px');
+			} else if (actualNumber.length > 8 && actualNumber.length <= 12) {
+				$('.actual').css('font-size', '30px');
+			} else {
+				$('.actual').text("Да ну, как-то слишком много!");
+			};
+		};
+
+
+		//   получает содержимое операнда из value при нажатии, сохраняет первое число
+		$('.act').click(function opUserInput() {
+			oldNumber = actualNumber;
+			actualNumber = "";
+			opAct = this.getAttribute("value");
+			$('#old').text(oldNumber);
+			$('#operate').text(" " + opAct + " ");
+			$('#new').text('');
+		});
+
+
+		//   считает, выводит результат, записывает результат в oldNumber
+		$('.result').click(function calculate() {
+			$('#new').text(actualNumber + " =");
+			switch (opAct) {
+				case ('+'):
+					resultNumber = +oldNumber + +actualNumber;
+					break;
+				case ('-'):
+					resultNumber = +oldNumber - +actualNumber;
+					break;
+				case ('/'):
+					resultNumber = +oldNumber / +actualNumber;
+					break;
+				case ('*'):
+					resultNumber = +oldNumber * +actualNumber;
+					break;
+				default:
+					resultNumber = actualNumber;
+					break;
+			}
+			resultNumber = Math.round(resultNumber * 100000) / 100000; //округление до 5 знака
+			actualNumber = resultNumber;
+			$('.actual').text(resultNumber);
+
+			// уменьшение шрифта для результата
+			if (String(resultNumber).length <= 8) {
+				$('.actual').css('font-size', '45px');
+			} else if (String(resultNumber).length > 8 && String(resultNumber).length <= 12) {
+				$('.actual').css('font-size', '30px');
+			} else {
+				$('.actual').text("Очень длинное число, sorry");
+			};
+
+			//проверка на NaN и бесконечность
+			if (!isFinite(resultNumber)) {
+				if (isNaN(resultNumber)) {
+					$('.actual').text("Не надо так делать");
+				} else {
+					$('.actual').text("На ноль деление к силы тёмной стороне ведёт");
+				}
+			}
+		});
+
+
+		//	 очистить всё
+		$('.clean').click(function cleanAll() {
+			actualNumber = "";
+			oldNumber = "";
+			opAct = "";
+			resultNumber = "";
+			$('.actual').text('0');
+			$('#old').text(oldNumber);
+			$('#operate').text(" " + opAct + " ");
+			$('#new').text(actualNumber + " ");
+		});
+
+
+		//	 поменять знак
+		$('.plusminus').click(function plusMinus() {
+			actualNumber = -actualNumber;
+			$('.actual').text(actualNumber);
+		});
+
+	</script>
+</body>
+
+</html>
